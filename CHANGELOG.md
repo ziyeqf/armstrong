@@ -1,3 +1,15 @@
+## v0.17.0
+
+ENHANCEMENTS:
+- Add compatibility with azurerm 5.0 and azapi 2.0.
+- Update the azurerm dependency mapping and azapi examples.
+- Update the API index download URL, Go dependencies, and CI workflows.
+
+BUG FIXES:
+- Fix parsing tagged AutoRest YAML blocks with the updated Markdown parser.
+- Prevent credential values from being written to logs while preserving credential scan diagnostics.
+- Handle response and archive close errors when loading the API index.
+
 ## v0.16.1
 BUG FIXES:
 - Fix a bug the azapi examples are not correctly loaded.
