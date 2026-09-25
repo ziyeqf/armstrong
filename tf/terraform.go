@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/hashicorp/terraform-exec/tfexec"
 	tfjson "github.com/hashicorp/terraform-json"
@@ -17,7 +18,10 @@ type Terraform struct {
 	LogEnabled bool
 }
 
-const planfile = "tfplan"
+const (
+	planfile            = "tfplan"
+	logSensitiveDataEnv = "LOG_SENSITIVE_DATA"
+)
 
 func NewTerraform(workingDirectory string, logEnabled bool) (*Terraform, error) {
 	execPath, err := FindTerraform(context.TODO())
@@ -26,6 +30,18 @@ func NewTerraform(workingDirectory string, logEnabled bool) (*Terraform, error) 
 	}
 	tf, err := tfexec.NewTerraform(workingDirectory, execPath)
 	if err != nil {
+		return nil, err
+	}
+	// SetEnv replaces the inherited environment, so copy it to preserve variables such as ARM_* and PATH.
+	env := make(map[string]string)
+	for _, entry := range os.Environ() {
+		key, value, ok := strings.Cut(entry, "=")
+		if ok && key != "" && !strings.EqualFold(key, logSensitiveDataEnv) {
+			env[key] = value
+		}
+	}
+	env[logSensitiveDataEnv] = "true"
+	if err := tf.SetEnv(env); err != nil {
 		return nil, err
 	}
 
